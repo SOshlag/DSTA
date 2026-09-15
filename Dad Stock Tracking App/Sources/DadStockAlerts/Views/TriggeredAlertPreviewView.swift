@@ -141,7 +141,7 @@ struct TriggeredStockAlertView: View {
         .background((alert.alertType.isBuy ? Color.green : Color.red).opacity(pulse ? 0.34 : 0.18))
         .background(.ultraThinMaterial)
         .onAppear {
-            guard !reduceMotion else { return }
+            guard !reduceMotion, alert.flashingEnabled else { return }
             withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) { pulse = true }
         }
     }

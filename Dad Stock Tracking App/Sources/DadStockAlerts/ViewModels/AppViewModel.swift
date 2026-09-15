@@ -28,8 +28,16 @@ final class AppViewModel: ObservableObject {
     var activeCount: Int { store.alerts.filter { $0.status != .paused && $0.status != .triggered }.count }
     var triggeredCount: Int { store.alerts.filter { $0.status == .triggered }.count }
     var hasTriggeredAlert: Bool { triggeredCount > 0 }
+    /// The alert shown in the menu-bar popover: the most recently triggered
+    /// alert takes priority; otherwise the newest alert.
     var primaryAlert: StockAlert? {
-        store.alerts.max(by: { $0.dateCreated < $1.dateCreated })
+        let triggered = store.alerts.filter { $0.status == .triggered }
+        if let newestTriggered = triggered.max(by: {
+            ($0.dateTriggered ?? .distantPast) < ($1.dateTriggered ?? .distantPast)
+        }) {
+            return newestTriggered
+        }
+        return store.alerts.max(by: { $0.dateCreated < $1.dateCreated })
     }
 
     func add(symbol rawSymbol: String, type: AlertType, targetText: String, noteText: String = "") -> String? {

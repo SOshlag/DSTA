@@ -2,6 +2,10 @@ import SwiftUI
 import AppKit
 
 final class StockAlertsAppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        AlertNotifier.requestPermissionIfNeeded()
+    }
+
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
     }
@@ -32,6 +36,7 @@ struct DadStockAlertsApp: App {
         let appModel = AppViewModel(marketData: initialService)
         _model = StateObject(wrappedValue: appModel)
         appModel.onAlertTriggered = { alert in
+            AlertNotifier.notify(for: alert)
             TriggeredAlertWindowController.shared.show(alert: alert, model: appModel)
         }
         if CommandLine.arguments.contains("--preview-alert") {
@@ -48,7 +53,8 @@ struct DadStockAlertsApp: App {
         MenuBarExtra {
             MenuBarView().environmentObject(model)
         } label: {
-            Image(systemName: "chart.line.uptrend.xyaxis")
+            Image(systemName: model.hasTriggeredAlert ? "bell.badge.fill" : "chart.line.uptrend.xyaxis")
+                .symbolRenderingMode(model.hasTriggeredAlert ? .multicolor : .monochrome)
                 .accessibilityLabel(model.hasTriggeredAlert
                     ? "Stock Alerts, \(model.triggeredCount) triggered"
                     : "Stock Alerts, \(model.activeCount) active")
