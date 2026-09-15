@@ -36,7 +36,7 @@ final class MockMarketDataService: MarketDataService {
         symbol: String,
         price: Decimal,
         timestamp: Date = Date(),
-        tradeID: String = UUID().uuidString
+        tradeID: String? = UUID().uuidString
     ) {
         prices[symbol] = price
         emit(symbol: symbol, price: price, timestamp: timestamp, tradeID: tradeID)
@@ -52,7 +52,7 @@ final class MockMarketDataService: MarketDataService {
         }
     }
 
-    private func emit(symbol: String, price: Decimal, timestamp: Date, tradeID: String) {
+    private func emit(symbol: String, price: Decimal, timestamp: Date, tradeID: String?) {
         onTrade?(CompletedTrade(symbol: symbol, price: price, timestamp: timestamp, tradeID: tradeID, exchangeID: "MOCK", feedID: feedName))
     }
 }

@@ -2,8 +2,14 @@ import SwiftUI
 import AppKit
 
 final class StockAlertsAppDelegate: NSObject, NSApplicationDelegate {
+    @MainActor static weak var model: AppViewModel?
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         AlertNotifier.requestPermissionIfNeeded()
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        Self.model?.store.flushPendingSave()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -35,6 +41,7 @@ struct DadStockAlertsApp: App {
         }
         let appModel = AppViewModel(marketData: initialService)
         _model = StateObject(wrappedValue: appModel)
+        StockAlertsAppDelegate.model = appModel
         appModel.onAlertTriggered = { alert in
             AlertNotifier.notify(for: alert)
             TriggeredAlertWindowController.shared.show(alert: alert, model: appModel)
