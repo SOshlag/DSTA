@@ -14,13 +14,7 @@ swift build
 swift run DadStockAlerts
 ```
 
-To open the full manager directly as a desktop window, without first using the menu bar:
-
-```sh
-swift run DadStockAlerts --desktop
-```
-
-The chart icon appears in the macOS menu bar. Open it and choose **Open Alert Manager**. Add a symbol, alert type, and positive target price. Alerts are saved to `~/Library/Application Support/DadStockAlerts/alerts.json` and reload when the app starts.
+The app opens its main window at launch and adds a chart icon to the macOS menu bar; if you close the window, choose **Open Main Window** from the menu-bar popover to bring it back. Add a symbol, alert type, and positive target price. Alerts are saved to `~/Library/Application Support/DadStockAlerts/alerts.json` and reload when the app starts.
 
 Run tests with `swift test`.
 
@@ -32,7 +26,7 @@ Create a double-clickable application bundle with:
 ./scripts/package-app.sh
 ```
 
-Then open `dist/Stock Alerts.app`. This launches as a menu-bar application without opening Terminal.
+Then open `dist/Stock Alerts.app`. This launches as a normal macOS app — main window plus menu-bar icon — without opening Terminal.
 
 ## Current workflow
 

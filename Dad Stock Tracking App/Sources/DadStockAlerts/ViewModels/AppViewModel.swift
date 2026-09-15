@@ -110,7 +110,8 @@ final class AppViewModel: ObservableObject {
         marketDataMessage = nil
         for alert in store.alerts where alert.symbol == trade.symbol {
             guard alert.status != .paused, alert.status != .triggered else { continue }
-            guard alert.lastProcessedTradeID != trade.tradeID else { continue }
+            // Dedupe only when the feed supplies a trade ID; some feeds omit it.
+            if let tradeID = trade.tradeID, alert.lastProcessedTradeID == tradeID { continue }
             // A slower REST snapshot can arrive after a newer WebSocket trade.
             // Never let delayed data move an alert backward in time.
             if let lastTimestamp = alert.lastTradeTimestamp,
@@ -124,16 +125,25 @@ final class AppViewModel: ObservableObject {
             let reachedTarget = updated.alertType.isReached(price: trade.price, target: updated.targetPrice)
             if updated.waitingForConditionToClear == true {
                 if !reachedTarget { updated.waitingForConditionToClear = false }
-                store.replace(updated)
+                replaceAfterTrade(updated, previous: alert)
                 continue
             }
             if reachedTarget {
                 updated.status = .triggered
                 updated.dateTriggered = Date()
             }
-            store.replace(updated)
+            replaceAfterTrade(updated, previous: alert)
             if reachedTarget { onAlertTriggered?(updated) }
         }
+    }
+
+    /// Persists immediately when the alert's state machine moved; batches the
+    /// disk write when only last-trade fields changed, since live feeds can
+    /// deliver many trades per second.
+    private func replaceAfterTrade(_ updated: StockAlert, previous: StockAlert) {
+        let priceOnlyChange = updated.status == previous.status
+            && updated.waitingForConditionToClear == previous.waitingForConditionToClear
+        store.replace(updated, coalescingSave: priceOnlyChange)
     }
 
     private func syncSubscriptions() {

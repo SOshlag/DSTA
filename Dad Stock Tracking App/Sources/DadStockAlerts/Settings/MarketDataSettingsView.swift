@@ -63,16 +63,19 @@ struct MarketDataSettingsView: View {
             dismiss()
             return
         }
-        guard !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-              !apiSecret.isEmpty else {
+        // Trim both credentials: a pasted trailing newline in either one
+        // causes an authentication failure that is hard to diagnose.
+        let key = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        let secret = apiSecret.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !key.isEmpty, !secret.isEmpty else {
             message = "Enter both Alpaca API credentials."
             return
         }
         do {
-            try KeychainService.save(apiKey.trimmingCharacters(in: .whitespacesAndNewlines), account: "apiKey")
-            try KeychainService.save(apiSecret, account: "apiSecret")
+            try KeychainService.save(key, account: "apiKey")
+            try KeychainService.save(secret, account: "apiSecret")
             guard let feed = AlpacaFeed(rawValue: mode) else { return }
-            model.useAlpaca(key: apiKey.trimmingCharacters(in: .whitespacesAndNewlines), secret: apiSecret, feed: feed)
+            model.useAlpaca(key: key, secret: secret, feed: feed)
             dismiss()
         } catch {
             message = "Credentials could not be saved in Keychain."
