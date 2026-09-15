@@ -54,4 +54,6 @@ Open the main window and choose **Market Data**. Enter Alpaca Market Data API cr
 
 The WebSocket subscribes only to completed `trades` events for symbols currently being monitored. Quote and bar messages are ignored and cannot reach the alert engine. Mock Data remains available for offline testing.
 
-macOS notification permission and configurable alert sounds remain future work.
+## Notifications and sounds
+
+When an alert triggers, the app plays a sound, posts a macOS notification, and switches the menu-bar icon to a bell badge until the alert is reset or dismissed. The menu-bar popover always surfaces the most recently triggered alert first. Notification permission is requested on first launch of the packaged app; notifications require running the packaged `Stock Alerts.app` (the bare `swift run` executable plays sounds only).
